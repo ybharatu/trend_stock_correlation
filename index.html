@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="stocks.js"></script>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 20px;
+    }
+
+    h1 {
+        margin-bottom: 20px;
+    }
+
+    #stockInput {
+        padding: 5px;
+        margin-right: 10px;
+    }
+
+    #chartContainer {
+        margin-top: 20px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+</head>
+<body>
+    <h1>Stock Chart</h1>
+    <label for="stockInput">Enter a stock symbol:</label>
+    <input type="text" id="stockInput">
+    <button onclick="getStockData()">Get Chart</button>
+    <div id="chartContainer">
+        <canvas id="stockChart"></canvas>
+    </div>
+</body>
+</html>
