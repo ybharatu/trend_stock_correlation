@@ -36,7 +36,7 @@
                     chartData.datasets[0].data.push(closePrice);
                 });
 
-                updateChart(chartData);
+                updateStockChart(chartData);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -62,7 +62,7 @@
         });
     }
 
-    function updateChart(data) {
+    function updateStockChart(data) {
         if (stockChart) {
             // If chart instance exists, update its data
             stockChart.data = data;
