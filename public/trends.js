@@ -7,7 +7,21 @@ function getSearchData() {
             const proxyUrl = 'http://localhost:3000/proxy';
             const apiUrl = `${proxyUrl}`;
 
-            fetch(apiUrl)
+            const params = {
+                param1: word,
+            };
+
+            console.log(word)
+            const options = {
+                method: 'POST',
+                 headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify( params )  
+            };
+
+            fetch(apiUrl, options)
                 .then(response => response.json())
                 .then(data => {
                     //console.log(data)
@@ -79,7 +93,7 @@ function getSearchData() {
             }
             else {
                 const ctx = document.getElementById('searchChart').getContext('2d');
-                const searchChart = new Chart(ctx, {
+                searchChart = new Chart(ctx, {
                   type: 'line',
                   data: data,
                   options: {
@@ -94,8 +108,8 @@ function getSearchData() {
                     },
                   },
                 })
-              .catch(error => {
-                console.error('Error:', error);
-              });
+              // .catch(error => {
+              //   console.error('Error:', error);
+              // });
             }
         }

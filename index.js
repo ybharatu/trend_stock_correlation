@@ -1,5 +1,11 @@
 const express = require('express');
 const RSSParser = require('rss-parser');
+var bodyParser = require('body-parser')
+// create application/json parser
+var jsonParser = bodyParser.json()
+ 
+// create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
 const app = express();
 require('dotenv').config();
 
@@ -35,10 +41,11 @@ app.use((req, res, next) => {
 // });
 const googleTrends = require('google-trends-api');
 
-app.get('/proxy', async (req, res) => {
+app.post('/proxy', jsonParser, async (req, res) => {
   console.log("Hello?")
+  console.log(req.body.param1)
 	//res.render('index');
-  const keyword = 'bitcoin';
+  const keyword = req.body.param1;
   const startDate = new Date();
   startDate.setFullYear(startDate.getFullYear() - 5); // 5 years ago
   const endDate = new Date();
@@ -54,7 +61,7 @@ app.get('/proxy', async (req, res) => {
 
   googleTrends.interestOverTime(options)
     .then(data => {
-      console.log(data)
+      //console.log(data)
       const trendData = JSON.parse(data).default.timelineData;
       const chartData = {
         labels: trendData.map(entry => entry.formattedTime),
