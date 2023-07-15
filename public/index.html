@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Stock Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/1.4.0/chartjs-plugin-annotation.min.js"></script> -->
+    <title>Word Search Graph</title>
+    <script src="trends.js"></script>
+<!--     <script src="node_modules/chart.js/dist/chart.min.js"></script>
+    <script src="node_modules/chartjs-plugin-annotation/dist/chartjs-plugin-annotation.min.js"></script> -->
     <script src="stocks.js"></script>
     
     <style>
@@ -38,16 +46,8 @@
     <button onclick="getStockData()">Get Chart</button>
     <div id="chartContainer">
         <canvas id="stockChart"></canvas>
+        <canvas id="annotationCanvas" style="position: absolute; left: 0; top: 0;"></canvas>
     </div>
-</body>
-
-<head>
-    <meta charset="UTF-8">
-    <title>Word Search Graph</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="trends.js"></script>
-</head>
-<body>
     <h1>Word Search Graph</h1>
     <label for="wordInput">Enter a word:</label>
     <input type="text" id="wordInput">
@@ -55,7 +55,6 @@
     <div id="chartContainer">
         <canvas id="searchChart"></canvas>
     </div>
-        
 </body>
 
 </html>

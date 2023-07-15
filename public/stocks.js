@@ -1,6 +1,11 @@
 
     let stockChart;
 
+    //import { Chart } from 'chart.js';
+    //const annotationPlugin = require('chartjs-plugin-annotation');
+
+    //Chart.register(annotationPlugin);
+
     function getStockData() {
         const stockSymbol = document.getElementById('stockInput').value;
         const apiKey = 'YOUR_ALPHA_VANTAGE_API_KEY';
@@ -11,8 +16,18 @@
             .then(data => {
                 const monthlyTimeSeries = data['Monthly Time Series'];
 
+                const annotations = {
+                  drawTime: 'afterDatasetsDraw',
+                  annotations: []
+                };
+                //const annotations = [];
+
+                const binOfDates = ['2020-08-31', '2021-11-30', '2022-02-28'];
+
+                
                 // Convert data to Chart.js format
                 const chartData = {
+                    type: 'line',
                     labels: [],
                     datasets: [{
                         label: stockSymbol,
@@ -36,55 +51,105 @@
                     chartData.datasets[0].data.push(closePrice);
                 });
 
-                updateStockChart(chartData);
+               binOfDates.forEach(date => {
+                const index = dates.indexOf(date);
+                console.log(index)
+                if (index !== -1) {
+                  annotations.annotations.push({
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: date,
+                    borderColor: 'red',
+                    borderWidth: 2,
+                    label: {
+                      backgroundColor: 'red',
+                      content: 'Marker',
+                      enabled: true,
+                      position: 'top'
+                    }
+                  });
+                }
+              });
+               //console.log(annotations)
+
+                updateStockChart(chartData, annotations);
             })
             .catch(error => {
                 console.error('Error:', error);
             });
     }
 
-    function renderChart(data) {
-        const ctx = document.getElementById('stockChart').getContext('2d');
-        const stockChart = new Chart(ctx, {
-            type: 'line',
-            data: data,
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        display: true
-                    },
-                    y: {
-                        display: true
-                    }
-                }
-            }
-        });
-    }
-
-    function updateStockChart(data) {
+    function updateStockChart(data, annotations) {
         if (stockChart) {
             // If chart instance exists, update its data
             stockChart.data = data;
+            stockChart.options.plugins.annotation.annotations = annotations.annotations;
+
             stockChart.update();
         } else {
+            //console.log(annotations)
             // If chart instance doesn't exist, create a new chart
             const ctx = document.getElementById('stockChart').getContext('2d');
+            //const ctx = document.getElementById('stockChart').getContext('2d');
+            // const annotationCanvas = document.getElementById('annotationCanvas');
+            // const annotationCtx = annotationCanvas.getContext('2d');
+            console.log(annotations.annotations)
             stockChart = new Chart(ctx, {
                 type: 'line',
                 data: data,
                 options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            display: true
-                        },
-                        y: {
-                            display: true
-                        }
+                    plugins: {
+                        annotation: annotations
                     }
                 }
             });
+            // stockChart = new Chart(ctx, {
+            //     data: data,
+            //     options: {
+            //         responsive: true,
+            //         scales: {
+            //             x: {
+            //                 display: true
+            //             },
+            //             y: {
+            //                 display: true
+            //             }
+            //         },
+            //         plugins: {
+            //             annotation: {
+            //               annotations: {
+            //                 line1: {
+            //                     type: 'point',
+            //                     xScaleID: 'x',
+            //                     xValue: '2021-11-30',
+            //                     yValue: 100,
+            //                     backgroundColor: 'red'
+            //                   // type: 'point',
+            //                   // //scaleID: 'x',
+            //                   // //value: 39,
+            //                   // //xMax: '2021-11-30',
+            //                   // backgroundColor: 'red',
+            //                   // //borderColor: 'red',
+            //                   // //borderWidth: 2,
+            //                   // x_value: '2021-11-30',
+            //                   // y_value: 100
+            //                 }
+            //               }
+            //             }
+            //           }
+            //   //       plugins: {
+            //   //       annotation: {
+            //   //           drawTime: 'afterDatasetsDraw',
+            //   //           annotations: annotations.annotations
+            //   //   }
+            //   // }
+            //     }
+
+      
+                
+            // });
+            console.log(stockChart)
         }
     }
 
