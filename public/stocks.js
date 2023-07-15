@@ -1,5 +1,6 @@
 
     let stockChart;
+    
 
     //import { Chart } from 'chart.js';
     //const annotationPlugin = require('chartjs-plugin-annotation');
@@ -54,14 +55,17 @@
                binOfDates.forEach(date => {
                 const index = dates.indexOf(date);
                 console.log(index)
+                const index_price = chartData.datasets[0].data[index]
                 if (index !== -1) {
                   annotations.annotations.push({
-                    type: 'line',
-                    mode: 'vertical',
+                    type: 'point',
+                    //mode: 'vertical',
                     scaleID: 'x',
-                    value: date,
-                    borderColor: 'red',
-                    borderWidth: 2,
+                    xValue: date,
+                    yValue: index_price,
+                    // borderColor: 'red',
+                    // borderWidth: 2,
+                    backgroundColor: 'rgba(255, 99, 132, 0.25)',
                     label: {
                       backgroundColor: 'red',
                       content: 'Marker',
