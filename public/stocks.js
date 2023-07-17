@@ -1,6 +1,6 @@
 
     let stockChart;
-    
+
 
     //import { Chart } from 'chart.js';
     //const annotationPlugin = require('chartjs-plugin-annotation');
@@ -158,7 +158,70 @@
     }
 
 
+let searchChart;
 
+function getSearchData() {
+            const word = document.getElementById('wordInput').value;
+            const rssUrl = `https://trends.google.com/trends/trendingsearches/daily/rss?geo=US`;
+
+            const proxyUrl = 'http://localhost:3000/proxy';
+            const apiUrl = `${proxyUrl}`;
+
+            const params = {
+                param1: word,
+            };
+
+            console.log(word)
+            const options = {
+                method: 'POST',
+                 headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify( params )  
+            };
+
+            fetch(apiUrl, options)
+                .then(response => response.json())
+                .then(data => {
+                    //console.log(data)
+                    
+
+                    newUpdateChart(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function newUpdateChart(data) {
+
+            if (searchChart) {
+                searchChart.data = data;
+                searchChart.update();
+            }
+            else {
+                const ctx = document.getElementById('searchChart').getContext('2d');
+                searchChart = new Chart(ctx, {
+                  type: 'line',
+                  data: data,
+                  options: {
+                    responsive: true,
+                    scales: {
+                      x: {
+                        display: true,
+                      },
+                      y: {
+                        display: true,
+                      },
+                    },
+                  },
+                })
+              // .catch(error => {
+              //   console.error('Error:', error);
+              // });
+            }
+        }
 
 
 
