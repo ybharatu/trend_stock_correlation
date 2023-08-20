@@ -23,7 +23,8 @@
                 };
                 //const annotations = [];
 
-                const binOfDates = ['2020-08-31', '2021-11-30', '2022-02-28'];
+                //const binOfDates = ['2020-08-31', '2021-11-30', '2022-02-28'];
+
 
                 
                 // Convert data to Chart.js format
@@ -46,11 +47,13 @@
                     //.reverse();
                     //.slice(0, 60); // 12 months * 5 years = 60 months
 
+                
                 dates.forEach(date => {
                     const closePrice = parseFloat(monthlyTimeSeries[date]['4. close']);
                     chartData.labels.push(date);
                     chartData.datasets[0].data.push(closePrice);
                 });
+                binOfDates = find_peaks(dates, chartData.datasets[0].data, 5)
 
                binOfDates.forEach(date => {
                 const index = dates.indexOf(date);
@@ -84,6 +87,32 @@
             });
     }
 
+    function find_peaks(xValues, yValues, threshold) {
+        // console.log(xValues)
+        // console.log(yValues)
+        all_peaks = []
+        all_dates = []
+
+        for (let i = 0; i < xValues.length; i++) {
+            if(i == 0 || i == xValues.length -1) {
+                continue
+            }
+            middle = yValues[i]
+            first = yValues[i-1]
+            last = yValues[i+1]
+
+            if(middle > first + threshold && middle > last + threshold){
+                //console.log(middle + " is a peak " + first + " and " + last + " are lower than it")
+                all_peaks.push(i)
+            }
+        }
+        all_peaks.forEach(peak => {
+            all_dates.push(xValues[peak])
+        })
+        //console.log(all_dates)
+        return all_dates
+    }
+
     function updateStockChart(data, annotations) {
         if (stockChart) {
             // If chart instance exists, update its data
@@ -108,51 +137,7 @@
                     }
                 }
             });
-            // stockChart = new Chart(ctx, {
-            //     data: data,
-            //     options: {
-            //         responsive: true,
-            //         scales: {
-            //             x: {
-            //                 display: true
-            //             },
-            //             y: {
-            //                 display: true
-            //             }
-            //         },
-            //         plugins: {
-            //             annotation: {
-            //               annotations: {
-            //                 line1: {
-            //                     type: 'point',
-            //                     xScaleID: 'x',
-            //                     xValue: '2021-11-30',
-            //                     yValue: 100,
-            //                     backgroundColor: 'red'
-            //                   // type: 'point',
-            //                   // //scaleID: 'x',
-            //                   // //value: 39,
-            //                   // //xMax: '2021-11-30',
-            //                   // backgroundColor: 'red',
-            //                   // //borderColor: 'red',
-            //                   // //borderWidth: 2,
-            //                   // x_value: '2021-11-30',
-            //                   // y_value: 100
-            //                 }
-            //               }
-            //             }
-            //           }
-            //   //       plugins: {
-            //   //       annotation: {
-            //   //           drawTime: 'afterDatasetsDraw',
-            //   //           annotations: annotations.annotations
-            //   //   }
-            //   // }
-            //     }
-
-      
-                
-            // });
+    
             console.log(stockChart)
         }
     }
@@ -171,6 +156,11 @@ function getSearchData() {
                 param1: word,
             };
 
+            const annotations = {
+                  drawTime: 'afterDatasetsDraw',
+                  annotations: []
+                };
+
             console.log(word)
             const options = {
                 method: 'POST',
@@ -185,19 +175,47 @@ function getSearchData() {
                 .then(response => response.json())
                 .then(data => {
                     //console.log(data)
-                    
+                    xValues = data.labels
+                    yValues = data.datasets[0].data
+                    console.log(xValues)
+                    console.log(yValues)
+                    binOfDates = find_peaks(xValues, yValues, 5)
 
-                    newUpdateChart(data);
+                    binOfDates.forEach(date => {
+                        const index = xValues.indexOf(date);
+                        const index_price = yValues[index]
+                        if (index !== -1) {
+                          annotations.annotations.push({
+                            type: 'point',
+                            //mode: 'vertical',
+                            scaleID: 'x',
+                            xValue: date,
+                            yValue: index_price,
+                            // borderColor: 'red',
+                            // borderWidth: 2,
+                            backgroundColor: 'rgba(255, 99, 132, 0.25)',
+                            label: {
+                              backgroundColor: 'red',
+                              content: 'Marker',
+                              enabled: true,
+                              position: 'top'
+                            }
+                          });
+                        }
+                      });
+
+                    newUpdateChart(data, annotations);
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 });
         }
 
-        function newUpdateChart(data) {
+        function newUpdateChart(data, annotations) {
 
             if (searchChart) {
                 searchChart.data = data;
+                searchChart.options.plugins.annotation.annotations = annotations.annotations;
                 searchChart.update();
             }
             else {
@@ -215,6 +233,9 @@ function getSearchData() {
                         display: true,
                       },
                     },
+                    plugins: {
+                        annotation: annotations
+                    }
                   },
                 })
               // .catch(error => {
