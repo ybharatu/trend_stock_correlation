@@ -1,5 +1,6 @@
 
     let stockChart;
+    let searchChart;
 
 
     //import { Chart } from 'chart.js';
@@ -92,6 +93,8 @@
         // console.log(yValues)
         all_peaks = []
         all_dates = []
+        max = 0
+        max_idx = -1
 
         for (let i = 0; i < xValues.length; i++) {
             if(i == 0 || i == xValues.length -1) {
@@ -101,6 +104,11 @@
             first = yValues[i-1]
             last = yValues[i+1]
 
+            if(middle > max){
+                max = middle
+                max_idx = i
+            }
+
             if(middle > first + threshold && middle > last + threshold){
                 //console.log(middle + " is a peak " + first + " and " + last + " are lower than it")
                 all_peaks.push(i)
@@ -109,6 +117,9 @@
         all_peaks.forEach(peak => {
             all_dates.push(xValues[peak])
         })
+        if(! all_peaks.includes(max_idx)){
+            all_dates.push(xValues[max_idx])
+        }
         //console.log(all_dates)
         return all_dates
     }
@@ -118,9 +129,15 @@
             // If chart instance exists, update its data
             stockChart.data = data;
             stockChart.options.plugins.annotation.annotations = annotations.annotations;
+            if(searchChart) {
+                    document.getElementById('compareButton').style.display = 'block';
+                }
 
             stockChart.update();
         } else {
+            if(searchChart) {
+                document.getElementById('compareButton').style.display = 'block';
+            }
             //console.log(annotations)
             // If chart instance doesn't exist, create a new chart
             const ctx = document.getElementById('stockChart').getContext('2d');
@@ -143,7 +160,7 @@
     }
 
 
-let searchChart;
+
 
 function getSearchData() {
             const word = document.getElementById('wordInput').value;
@@ -216,9 +233,15 @@ function getSearchData() {
             if (searchChart) {
                 searchChart.data = data;
                 searchChart.options.plugins.annotation.annotations = annotations.annotations;
+                if(stockChart) {
+                    document.getElementById('compareButton').style.display = 'block';
+                }
                 searchChart.update();
             }
             else {
+                if(stockChart) {
+                    document.getElementById('compareButton').style.display = 'block';
+                }
                 const ctx = document.getElementById('searchChart').getContext('2d');
                 searchChart = new Chart(ctx, {
                   type: 'line',
@@ -243,6 +266,13 @@ function getSearchData() {
               // });
             }
         }
+
+function compareData() {
+    // Your comparison logic here
+    // For example, you can update the stock data with a different stock's data and annotations
+    // Then call updateStockChart again
+    console.log("Comparing Data")
+}
 
 
 
