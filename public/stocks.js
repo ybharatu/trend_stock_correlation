@@ -1,6 +1,25 @@
 
     let stockChart;
     let searchChart;
+    let stock_x;
+    let stock_y;
+    let search_x;
+    let search_y;
+    let search_max =[];
+    const monthAbbreviations = {
+  Jan: '01',
+  Feb: '02',
+  Mar: '03',
+  Apr: '04',
+  May: '05',
+  Jun: '06',
+  Jul: '07',
+  Aug: '08',
+  Sep: '09',
+  Oct: '10',
+  Nov: '11',
+  Dec: '12',
+};
 
 
     //import { Chart } from 'chart.js';
@@ -55,6 +74,8 @@
                     chartData.datasets[0].data.push(closePrice);
                 });
                 binOfDates = find_peaks(dates, chartData.datasets[0].data, 5)
+                stock_x = dates
+                stock_y = chartData.datasets[0].data
 
                binOfDates.forEach(date => {
                 const index = dates.indexOf(date);
@@ -80,6 +101,7 @@
                 }
               });
                //console.log(annotations)
+               console.log(chartData)
 
                 updateStockChart(chartData, annotations);
             })
@@ -163,8 +185,9 @@
 
 
 function getSearchData() {
+            search_max = []
             const word = document.getElementById('wordInput').value;
-            const rssUrl = `https://trends.google.com/trends/trendingsearches/daily/rss?geo=US`;
+            const rssUrl = `https://trends.google.com/trends/trendingsearches/monthly/rss?geo=US`;
 
             const proxyUrl = 'http://localhost:3000/proxy';
             const apiUrl = `${proxyUrl}`;
@@ -178,7 +201,7 @@ function getSearchData() {
                   annotations: []
                 };
 
-            console.log(word)
+            //console.log(word)
             const options = {
                 method: 'POST',
                  headers: {
@@ -197,11 +220,14 @@ function getSearchData() {
                     console.log(xValues)
                     console.log(yValues)
                     binOfDates = find_peaks(xValues, yValues, 5)
+                    search_x = xValues
+                    search_y = yValues
 
                     binOfDates.forEach(date => {
                         const index = xValues.indexOf(date);
                         const index_price = yValues[index]
                         if (index !== -1) {
+                          convert_date(date)
                           annotations.annotations.push({
                             type: 'point',
                             //mode: 'vertical',
@@ -229,7 +255,7 @@ function getSearchData() {
         }
 
         function newUpdateChart(data, annotations) {
-
+            console.log(annotations)
             if (searchChart) {
                 searchChart.data = data;
                 searchChart.options.plugins.annotation.annotations = annotations.annotations;
@@ -267,11 +293,108 @@ function getSearchData() {
             }
         }
 
+// Calculate the mean (average) of an array
+function calculateMean(data) {
+    return data.reduce((sum, value) => sum + value, 0) / data.length;
+}
+
+// Calculate the correlation coefficient
+function calculateCorrelation(data1, data2) {
+    const mean1 = calculateMean(data1);
+    const mean2 = calculateMean(data2);
+
+    let numerator = 0;
+    let denominator1 = 0;
+    let denominator2 = 0;
+
+    for (let i = 0; i < data1.length; i++) {
+        const deviation1 = data1[i] - mean1;
+        const deviation2 = data2[i] - mean2;
+
+        numerator += deviation1 * deviation2;
+        denominator1 += deviation1 ** 2;
+        denominator2 += deviation2 ** 2;
+    }
+
+    const correlation = numerator / Math.sqrt(denominator1 * denominator2);
+
+    return correlation;
+}
+
+function resampleAndAggregate(data, expectedLength, aggregationFunction) {
+    const resampledData = [];
+    const chunkSize = Math.ceil(data.length / expectedLength);
+
+    for (let i = 0; i < data.length; i += chunkSize) {
+        const chunk = data.slice(i, i + chunkSize);
+        const aggregatedValue = aggregationFunction(chunk);
+        resampledData.push(aggregatedValue);
+    }
+
+    return resampledData;
+}
+
+// Aggregation function to calculate the average value
+function calculateAverage(values) {
+    const sum = values.reduce((acc, value) => acc + value, 0);
+    return sum / values.length;
+}
+
+
 function compareData() {
     // Your comparison logic here
     // For example, you can update the stock data with a different stock's data and annotations
     // Then call updateStockChart again
-    console.log("Comparing Data")
+       const annotations = {
+                  drawTime: 'afterDatasetsDraw',
+                  annotations: []
+                };
+
+    console.log(stock_x)
+    for (let i = 0; i < search_max.length; i++) {
+      element = search_max[i];
+      console.log(element);
+      index = stock_x.findIndex(item => item.includes(element));
+      if(index >= 0){
+            date = stock_x[index]
+          index_price = stock_y[index]
+          annotations.annotations.push({
+                                type: 'point',
+                                //mode: 'vertical',
+                                scaleID: 'x',
+                                xValue: date,
+                                yValue: index_price,
+                                // borderColor: 'red',
+                                // borderWidth: 2,
+                                backgroundColor: 'rgba(132, 99, 255, 0.25)',
+                                label: {
+                                  backgroundColor: 'green',
+                                  content: 'Marker',
+                                  enabled: true,
+                                  position: 'top'
+                                }
+                              });
+      }
+      
+    }
+    updateStockChart(stockChart.data, annotations)
+    
+//     console.log("Comparing Data")
+//     resampledData = resampleAndAggregate(search_y, stock_y.length, calculateAverage);
+//     console.log("Resample Data: " + resampledData)
+//     console.log("Length = " + resampledData.length)
+//     console.log(stock_y.length)
+//     const correlationCoefficient = calculateCorrelation(stock_y, resampledData);
+//     console.log(`Correlation coefficient: ${correlationCoefficient}`);
+ }
+
+function convert_date(date) {
+    //console.log("Current Date: " + date)
+    words = date.split(/\s+/);
+    console.log(words)
+    new_date = words[words.length - 1] + "-" + monthAbbreviations[words[0]]
+    console.log(new_date)
+    search_max.push(new_date)
 }
 
 
